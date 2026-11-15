@@ -50,14 +50,14 @@ int main(void) {
         }while (err != 0);
 
         //memory allocation
-        float **A = (float **)calloc(systemSize,  sizeof(float *));
+        int **A = (int **)calloc(systemSize,  sizeof(int *));
         if (A == NULL) {
             printf("Memory allocation failed\n");
             err = 1;
         }
         else {
             for (int i = 0; i < systemSize; i++) {
-                A[i] = (float *)calloc(systemSize, sizeof(float));
+                A[i] = (int *)calloc(systemSize, sizeof(int));
                 if (A[i] == NULL) {
                     free(A);
                     printf("Memory allocation failed\n");
@@ -71,9 +71,32 @@ int main(void) {
 
         for (int i = 0; i < systemSize; i++) {
             for (int j = 0; j < systemSize; j++) {
-                printf("");
+                int coefficient;
+
+                printf("A%d%d:",i+1,j+1);
+
+                if (!scanf("%d",&coefficient)) {
+                    printf("\nInvalid input. Coefficient must be an integer\n");
+                    j--;
+                    CleanBuffer();
+                    continue;
+                }
+
+                if (i == j && coefficient == 0) {
+                    printf("\nInvalid input. Diagonal coefficient can't equals zero\n");
+                    j--;
+                }
+                else {
+                    A[i][j] = coefficient;
+                }
             }
         }
+
+        // for (int i = 0; i < systemSize; i++) {
+        //     for (int j = 0; j < systemSize; j++) {
+        //         printf("A%d%d = %d\n",i+1,j+1, A[i][j]);
+        //     }
+        // }
 
 
         do {
