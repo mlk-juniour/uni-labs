@@ -1,8 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <math.h>
 
 void CleanBuffer(void);
+
+float MaxDelta(int size, float delta[size]);
 
 int main(void) {
 
@@ -10,7 +12,8 @@ int main(void) {
     int systemSize;
     int bottomBorder = 2;
     int topBorder = 100;
-    float epsilon;
+    float epsilon,prop;
+
 
     do{
         printf("Program for solving SLEs\n");
@@ -50,14 +53,14 @@ int main(void) {
         }while (err != 0);
 
         //memory allocation
-        int **A = (int **)calloc(systemSize,  sizeof(int *));
+        float **A = (float **)calloc(systemSize,  sizeof(float *));
         if (A == NULL) {
             printf("Memory allocation failed\n");
             err = 1;
         }
         else {
             for (int i = 0; i < systemSize; i++) {
-                A[i] = (int *)calloc(systemSize, sizeof(int));
+                A[i] = (float *)calloc(systemSize, sizeof(float));
                 if (A[i] == NULL) {
                     free(A);
                     printf("Memory allocation failed\n");
@@ -67,15 +70,18 @@ int main(void) {
             }
         }
 
+        float B [systemSize];
+        float X [systemSize];
+
         //coefficients
 
         for (int i = 0; i < systemSize; i++) {
             for (int j = 0; j < systemSize; j++) {
-                int coefficient;
+                float coefficient;
 
                 printf("A%d%d:",i+1,j+1);
 
-                if (!scanf("%d",&coefficient)) {
+                if (!scanf("%f",&coefficient)) {
                     printf("\nInvalid input. Coefficient must be an integer\n");
                     j--;
                     CleanBuffer();
@@ -92,12 +98,58 @@ int main(void) {
             }
         }
 
+        //free index
+        for (int i = 0; i < systemSize; i++) {
+            float freeIndex;
+            printf("B%d:",i+1);
+            if (!scanf("%f",&freeIndex)) {
+                printf("\nInvalid input. Coefficient must be an integer\n");
+                i--;
+                CleanBuffer();
+            }
+            else {
+                B[i] = freeIndex;
+            }
+        }
+
+        printf("\n");
         // for (int i = 0; i < systemSize; i++) {
         //     for (int j = 0; j < systemSize; j++) {
         //         printf("A%d%d = %d\n",i+1,j+1, A[i][j]);
         //     }
         // }
 
+        float xp[systemSize];
+
+        for (int i = 0; i < systemSize; i++) {
+            xp[i] = B[i]/A[i][i];
+        }
+
+        do {
+            float delta[systemSize];
+
+            for (int i = 0; i < systemSize; i++) {
+
+                float sum = 0;
+
+                for (int j = 0; j < systemSize; j++) {
+
+                    if (i!=j) {
+                        sum += A[i][j]* xp[j];
+                    }
+                }
+                X[i] = (B[i] - sum) / A[i][i];
+                delta[i] = fabs(X[i] - xp[i]);
+            }
+            for (int i = 0; i < systemSize; i++) {
+                xp[i] = X[i];
+            }
+            prop = MaxDelta(systemSize,delta);
+        }while (prop>epsilon);
+
+        for (int i = 0; i < systemSize; i++) {
+            printf("X%d: %f\n",i+1, X[i]);
+        }
 
         do {
             err = 0;
@@ -116,4 +168,14 @@ int main(void) {
 
 void CleanBuffer(void) {
     while (getchar() != '\n');
+}
+
+float MaxDelta(int size, float delta[size]) {
+    float maxDelta = delta[0];
+    for (int i = 0; i < size; i++) {
+        if (delta[i] > maxDelta) {
+            maxDelta = delta[i];
+        }
+    }
+    return maxDelta;
 }
